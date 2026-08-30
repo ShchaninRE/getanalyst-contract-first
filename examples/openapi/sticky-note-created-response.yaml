@@ -1,0 +1,12 @@
+summary: Созданный стикер
+value:
+  id: sticky-101
+  boardId: board-001
+  content: Contract-first
+  position:
+    x: 420
+    y: 180
+  color: yellow
+  createdBy: user-042
+  createdAt: '2026-08-09T12:45:00Z'
+  updatedAt: '2026-08-09T12:45:00Z'

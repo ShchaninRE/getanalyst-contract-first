@@ -1,0 +1,5 @@
+summary: Целевой объект не найден
+value:
+  code: TARGET_NOT_FOUND
+  message: Целевой объект не найден на запрошенной доске.
+  traceId: trace-7ff12

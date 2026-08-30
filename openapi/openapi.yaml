@@ -1,0 +1,307 @@
+openapi: 3.1.0
+info:
+  title: API совместной доски
+  version: 1.0.0
+  description: Демонстрационный API для выпуска подкаста GetAnalyst о подходе Contract-first. Описывает работу с досками, стикерами и комментариями
+servers:
+- url: http://localhost:4010
+  description: Локальный mock-сервер Prism
+security:
+- bearerAuth: []
+tags:
+- name: Boards
+  description: Получение данных доски и текущего уровня доступа пользователя
+- name: Sticky notes
+  description: Создание, редактирование и удаление стикеров на доске
+- name: Comments
+  description: Добавление комментариев и перевод открытых комментариев в решённые
+paths:
+  /boards/{boardId}:
+    parameters:
+    - $ref: '#/components/parameters/BoardId'
+    get:
+      tags:
+      - Boards
+      operationId: getBoard
+      summary: Получить доску
+      description: Возвращает доску доступному пользователю. Доступ разрешён владельцу или участнику доски
+      responses:
+        '200':
+          description: Данные доски успешно получены
+          content:
+            application/json:
+              schema:
+                $ref: ../schemas/openapi/board.yaml
+              examples:
+                default:
+                  $ref: ../examples/openapi/board-response.yaml
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/BoardNotFound'
+  /boards/{boardId}/sticky-notes:
+    parameters:
+    - $ref: '#/components/parameters/BoardId'
+    post:
+      tags:
+      - Sticky notes
+      operationId: createStickyNote
+      summary: Создать стикер
+      description: Создаёт стикер на доске. Требуется уровень доступа `EDITOR` или `OWNER`
+      requestBody:
+        description: Данные нового стикера
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: ../schemas/openapi/create-sticky-note-request.yaml
+            examples:
+              contractFirst:
+                $ref: ../examples/openapi/create-sticky-note-request.yaml
+      responses:
+        '201':
+          description: Стикер успешно создан
+          content:
+            application/json:
+              schema:
+                $ref: ../schemas/openapi/sticky-note.yaml
+              examples:
+                created:
+                  $ref: ../examples/openapi/sticky-note-created-response.yaml
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/BoardNotFound'
+  /boards/{boardId}/sticky-notes/{stickyNoteId}: # Path для операций с конкретным стикером на конкретной доске
+    parameters: # Общие path-параметры для PATCH и DELETE
+    - $ref: '#/components/parameters/BoardId' # Ссылка на параметр BoardId, описанный ниже в components.parameters
+    - $ref: '#/components/parameters/StickyNoteId' # Ссылка на параметр StickyNoteId, описанный ниже в components.parameters
+    patch: # HTTP-метод для частичного изменения существующего стикера
+      tags: # Группа операции в документации
+      - Sticky notes # Операция относится к разделу Sticky notes
+      operationId: updateStickyNote # Уникальный идентификатор операции в спецификации
+      summary: Отредактировать стикер # Короткое название операции
+      description: Обновляет текст и/или позицию стикера. Требуется `EDITOR` или `OWNER`. Стикер должен принадлежать доске # Краткое описание поведения и проверки прав
+      requestBody: # Тело HTTP-запроса
+        description: Изменяемые данные стикера # Назначение тела запроса
+        required: true # Тело запроса обязательно
+        content: # Поддерживаемые форматы тела запроса
+          application/json: # Запрос передаётся в JSON
+            schema: # Структура входных данных
+              $ref: ../schemas/openapi/update-sticky-note-request.yaml # Ссылка на файл schemas/openapi/update-sticky-note-request.yaml со схемой запроса
+            examples: # Примеры входных данных
+              updateText: # Имя примера изменения текста
+                $ref: ../examples/openapi/update-sticky-note-request.yaml # Ссылка на файл examples/openapi/update-sticky-note-request.yaml с примером запроса
+      responses: # Возможные HTTP-ответы операции
+        '200': # Успешное обновление
+          description: Стикер успешно обновлён # Значение ответа 200
+          content: # Тело успешного ответа
+            application/json: # Ответ возвращается в JSON
+              schema: # Структура успешного ответа
+                $ref: ../schemas/openapi/sticky-note.yaml # Ссылка на файл schemas/openapi/sticky-note.yaml со схемой стикера
+              examples: # Примеры успешного ответа
+                updated: # Имя примера обновлённого стикера
+                  $ref: ../examples/openapi/sticky-note-updated-response.yaml # Ссылка на файл examples/openapi/sticky-note-updated-response.yaml с примером ответа
+        '400': # Некорректные входные данные
+          $ref: '#/components/responses/BadRequest' # Ссылка на общий ответ BadRequest в components.responses
+        '401': # Ошибка аутентификации
+          $ref: '#/components/responses/Unauthorized' # Ссылка на общий ответ Unauthorized в components.responses
+        '403': # Недостаточно прав
+          $ref: '#/components/responses/Forbidden' # Ссылка на общий ответ Forbidden в components.responses
+        '404': # Доска или стикер не найдены
+          description: Ресурс не найден # Общее описание HTTP 404
+          content: # Тело ответа с бизнес-кодом ошибки
+            application/json: # Ошибка возвращается в JSON
+              schema: # Общая структура ошибки
+                $ref: ../schemas/openapi/error-response.yaml # Ссылка на файл schemas/openapi/error-response.yaml со схемой ошибки
+              examples: # Возможные бизнес-причины HTTP 404
+                boardNotFound: # Вариант: не найдена доска
+                  $ref: ../examples/openapi/errors/board-not-found.yaml # Ссылка на пример BOARD_NOT_FOUND
+                stickyNoteNotFound: # Вариант: не найден стикер
+                  $ref: ../examples/openapi/errors/sticky-note-not-found.yaml # Ссылка на пример STICKY_NOTE_NOT_FOUND
+    delete: # HTTP-метод для удаления конкретного стикера
+      tags: # Группа операции в документации
+      - Sticky notes # Операция относится к разделу Sticky notes
+      operationId: deleteStickyNote # Уникальный идентификатор операции в спецификации
+      summary: Удалить стикер # Короткое название операции
+      description: Удаляет стикер с доски. Требуется `EDITOR` или `OWNER`. Стикер должен принадлежать доске # Краткое описание поведения и проверки прав
+      responses: # Возможные HTTP-ответы операции
+        '204': # Успешное удаление без тела ответа
+          description: Стикер успешно удалён # Значение ответа 204
+        '401': # Ошибка аутентификации
+          $ref: '#/components/responses/Unauthorized' # Ссылка на общий ответ Unauthorized в components.responses
+        '403': # Недостаточно прав
+          $ref: '#/components/responses/Forbidden' # Ссылка на общий ответ Forbidden в components.responses
+        '404': # Доска или стикер не найдены
+          description: Ресурс не найден # Общее описание HTTP 404
+          content: # Тело ответа с бизнес-кодом ошибки
+            application/json: # Ошибка возвращается в JSON
+              schema: # Общая структура ошибки
+                $ref: ../schemas/openapi/error-response.yaml # Ссылка на файл schemas/openapi/error-response.yaml со схемой ошибки
+              examples: # Возможные бизнес-причины HTTP 404
+                boardNotFound: # Вариант: не найдена доска
+                  $ref: ../examples/openapi/errors/board-not-found.yaml # Ссылка на пример BOARD_NOT_FOUND
+                stickyNoteNotFound: # Вариант: не найден стикер
+                  $ref: ../examples/openapi/errors/sticky-note-not-found.yaml # Ссылка на пример STICKY_NOTE_NOT_FOUND
+  /boards/{boardId}/comments:
+    parameters:
+    - $ref: '#/components/parameters/BoardId'
+    post:
+      tags:
+      - Comments
+      operationId: createComment
+      summary: Добавить комментарий
+      description: Добавляет комментарий к объекту доски. Требуется `COMMENTER`, `EDITOR` или `OWNER`. Объект должен принадлежать доске
+      requestBody:
+        description: Данные нового комментария
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: ../schemas/openapi/create-comment-request.yaml
+            examples:
+              architectureComment:
+                $ref: ../examples/openapi/create-comment-request.yaml
+      responses:
+        '201':
+          description: Комментарий успешно создан
+          content:
+            application/json:
+              schema:
+                $ref: ../schemas/openapi/comment.yaml
+              examples:
+                created:
+                  $ref: ../examples/openapi/comment-created-response.yaml
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/TargetNotFound'
+  /boards/{boardId}/comments/{commentId}/resolve:
+    parameters:
+    - $ref: '#/components/parameters/BoardId'
+    - $ref: '#/components/parameters/CommentId'
+    post:
+      tags:
+      - Comments
+      operationId: resolveComment
+      summary: Решить комментарий
+      description: Решает открытый комментарий. Действие доступно автору, `EDITOR` или `OWNER`. Повторное решение возвращает `409 Conflict`
+      responses:
+        '200':
+          description: Комментарий успешно решён
+          content:
+            application/json:
+              schema:
+                $ref: ../schemas/openapi/comment.yaml
+              examples:
+                resolved:
+                  $ref: ../examples/openapi/comment-resolved-response.yaml
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/CommentNotFound'
+        '409':
+          description: Комментарий уже решён
+          content:
+            application/json:
+              schema:
+                $ref: ../schemas/openapi/error-response.yaml
+              examples:
+                alreadyResolved:
+                  $ref: ../examples/openapi/errors/comment-already-resolved.yaml
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: Bearer-токен, идентифицирующий пользователя. Проверка токена и прав выполняется backend
+  parameters:
+    BoardId: # Переиспользуемое описание path-параметра boardId
+      name: boardId # Имя параметра в URL
+      in: path # Параметр передаётся в пути запроса
+      required: true # Path-параметр обязателен
+      description: Идентификатор доски # Назначение параметра
+      schema: # Тип значения параметра
+        type: string # boardId передаётся строкой
+    StickyNoteId: # Переиспользуемое описание path-параметра stickyNoteId
+      name: stickyNoteId # Имя параметра в URL
+      in: path # Параметр передаётся в пути запроса
+      required: true # Path-параметр обязателен
+      description: Идентификатор стикера # Назначение параметра
+      schema: # Тип значения параметра
+        type: string # stickyNoteId передаётся строкой
+    CommentId:
+      name: commentId
+      in: path
+      required: true
+      description: Идентификатор комментария
+      schema:
+        type: string
+  responses:
+    BadRequest: # Общий компонент ответа 400
+      description: Некорректные входные данные # Краткое значение ошибки
+      content: # Тело ответа 400
+        application/json: # Ошибка возвращается в JSON
+          schema: # Структура ошибки
+            $ref: ../schemas/openapi/error-response.yaml # Ссылка на общий файл схемы ошибки
+          examples: # Примеры ответа 400
+            invalidInput: # Имя примера
+              $ref: ../examples/openapi/errors/bad-request.yaml # Ссылка на файл с примером INVALID_REQUEST
+    Unauthorized: # Общий компонент ответа 401
+      description: Данные аутентификации отсутствуют, истекли или недействительны # Краткое значение ошибки
+      content: # Тело ответа 401
+        application/json: # Ошибка возвращается в JSON
+          schema: # Структура ошибки
+            $ref: ../schemas/openapi/error-response.yaml # Ссылка на общий файл схемы ошибки
+          examples: # Примеры ответа 401
+            missingToken: # Имя примера
+              $ref: ../examples/openapi/errors/unauthorized.yaml # Ссылка на файл с примером UNAUTHORIZED
+    Forbidden: # Общий компонент ответа 403
+      description: Недостаточно прав для выполнения операции # Краткое значение ошибки
+      content: # Тело ответа 403
+        application/json: # Ошибка возвращается в JSON
+          schema: # Структура ошибки
+            $ref: ../schemas/openapi/error-response.yaml # Ссылка на общий файл схемы ошибки
+          examples: # Примеры ответа 403
+            insufficientPermissions: # Имя примера
+              $ref: ../examples/openapi/errors/forbidden.yaml # Ссылка на файл с примером FORBIDDEN
+    BoardNotFound:
+      description: Доска не найдена
+      content:
+        application/json:
+          schema:
+            $ref: ../schemas/openapi/error-response.yaml
+          examples:
+            notFound:
+              $ref: ../examples/openapi/errors/board-not-found.yaml
+    CommentNotFound:
+      description: Комментарий не найден
+      content:
+        application/json:
+          schema:
+            $ref: ../schemas/openapi/error-response.yaml
+          examples:
+            notFound:
+              $ref: ../examples/openapi/errors/comment-not-found.yaml
+    TargetNotFound:
+      description: Целевой объект не найден
+      content:
+        application/json:
+          schema:
+            $ref: ../schemas/openapi/error-response.yaml
+          examples:
+            notFound:
+              $ref: ../examples/openapi/errors/target-not-found.yaml

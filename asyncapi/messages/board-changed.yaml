@@ -1,0 +1,15 @@
+message: # Описание сообщения Board Changed
+  name: Изменение доски # Техническое имя сообщения в документации
+  title: Доска изменена # Человекочитаемый заголовок
+  summary: Событие об изменении доски. # Краткое описание сообщения
+  description: Уведомляет заинтересованные сервисы об изменении содержимого доски # Назначение сообщения
+  tags: # Группы сообщения в документации
+  - name: Изменения доски # Сообщение относится к группе изменений доски
+  contentType: application/json # Payload передаётся в JSON
+  correlationId: # Правило определения correlation ID сообщения
+    description: Связывает событие с исходной операцией # Назначение correlation ID
+    location: $message.payload#/correlationId # Поле correlationId берётся из payload сообщения
+  payload: # Структура данных сообщения
+    $ref: '../../schemas/asyncapi/board-changed-payload.yaml' # Ссылка на файл schemas/asyncapi/board-changed-payload.yaml со схемой payload
+  examples: # Примеры сообщения
+  - $ref: ../../examples/asyncapi/board-changed.yaml # Ссылка на файл examples/asyncapi/board-changed.yaml с примером события

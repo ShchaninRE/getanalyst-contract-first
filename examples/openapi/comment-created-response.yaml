@@ -1,0 +1,11 @@
+summary: Созданный комментарий
+value:
+  id: comment-501
+  boardId: board-001
+  itemId: sticky-101
+  text: Добавить в контракт описание ошибок
+  status: OPEN
+  authorId: user-042
+  createdAt: '2026-08-09T12:55:00Z'
+  resolvedAt:
+  resolvedBy:

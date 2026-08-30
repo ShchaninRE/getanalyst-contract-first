@@ -1,0 +1,13 @@
+type: object # Корневой тип схемы запроса
+description: Данные для изменения стикера # Назначение схемы
+additionalProperties: false # Запрещает поля, не описанные в properties
+minProperties: 1 # Нужно передать хотя бы одно изменяемое поле
+properties: # Поля, которые можно изменить
+  content: # Поле с новым текстом
+    type: string # Текст передаётся строкой
+    description: Новый текст стикера # Назначение поля
+    minLength: 1 # Пустая строка запрещена
+    maxLength: 2000 # Максимальная длина текста
+  position: # Поле с новой позицией
+    description: Новая позиция стикера # Назначение поля
+    $ref: ./position.yaml # Ссылка на файл schemas/openapi/position.yaml с координатами

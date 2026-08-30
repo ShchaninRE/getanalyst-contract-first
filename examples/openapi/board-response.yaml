@@ -1,0 +1,8 @@
+summary: Пример доски, доступной пользователю
+value:
+  id: board-001
+  title: Воркшоп по проектированию API
+  ownerId: user-001
+  accessLevel: EDITOR
+  createdAt: '2026-08-09T10:00:00Z'
+  updatedAt: '2026-08-09T12:30:00Z'

@@ -1,0 +1,12 @@
+asyncapi: 2.0.0 # Версия спецификации AsyncAPI
+info: # Общая информация о контракте
+  title: События совместной доски # Название AsyncAPI-контракта
+  description: Демонстрационный AsyncAPI-контракт для выпуска подкаста GetAnalyst о подходе Contract-first # Краткое назначение контракта
+  version: 1.0.0 # Версия самого контракта
+tags: # Группы событий в документации
+  - name: Изменения доски # Имя группы
+    description: События об изменениях содержимого доски # Назначение группы
+defaultContentType: application/json # Формат сообщений по умолчанию
+channels: # Каналы обмена сообщениями
+  board.changed.v1: # Канал события изменения доски версии 1
+    $ref: './events/board-events.yaml#/channels/board.changed.v1' # Ссылка на канал в файле asyncapi/events/board-events.yaml

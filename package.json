@@ -1,0 +1,28 @@
+{
+  "name": "getanalyst-contract-first",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Демо OpenAPI + AsyncAPI в подходе Contract-first для GetAnalyst",
+  "scripts": {
+    "clean": "node scripts/clean.mjs",
+    "lint": "redocly lint openapi/openapi.yaml",
+    "build:redoc": "redocly build-docs openapi/openapi.yaml --output dist/redoc/openapi.html",
+    "build:swagger": "node scripts/build-swagger.mjs",
+    "build:asyncapi": "node scripts/build-asyncapi-docs.mjs",
+    "build:tabs": "node scripts/build-tabs.mjs",
+    "build": "npm run clean && npm run lint && npm run build:redoc && npm run build:swagger && npm run build:asyncapi && npm run build:tabs && node scripts/copy-specs.mjs",
+    "mock": "prism mock -h 0.0.0.0 -p 4010 openapi/openapi.yaml",
+    "serve:redoc": "node scripts/serve-static.mjs dist/redoc 8080",
+    "serve:swagger": "node scripts/serve-static.mjs dist/swagger 8081",
+    "demo": "node scripts/start-demo.mjs"
+  },
+  "devDependencies": {
+    "@redocly/cli": "2.43.2",
+    "@stoplight/prism-cli": "5.16.0",
+    "swagger-ui-dist": "5.32.12",
+    "yaml": "2.9.0"
+  },
+  "engines": {
+    "node": ">=20.19.0 <25"
+  }
+}

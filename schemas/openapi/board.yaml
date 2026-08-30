@@ -1,0 +1,32 @@
+type: object
+description: Данные совместной доски
+additionalProperties: false
+required:
+- id
+- title
+- ownerId
+- accessLevel
+- createdAt
+- updatedAt
+properties:
+  id:
+    type: string
+    description: Идентификатор доски
+  title:
+    type: string
+    description: Название доски
+    maxLength: 200
+  ownerId:
+    type: string
+    description: Идентификатор владельца
+  accessLevel:
+    description: Уровень доступа текущего пользователя
+    $ref: ./access-level.yaml
+  createdAt:
+    type: string
+    format: date-time
+    description: Дата и время создания
+  updatedAt:
+    type: string
+    format: date-time
+    description: Дата и время последнего изменения

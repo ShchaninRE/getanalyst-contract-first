@@ -1,0 +1,7 @@
+type: string
+description: Уровень доступа пользователя к доске
+enum:
+- VIEWER
+- COMMENTER
+- EDITOR
+- OWNER

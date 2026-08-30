@@ -1,0 +1,7 @@
+node_modules/
+dist/
+.demo-logs/
+.asyncapi-build/
+.DS_Store
+Thumbs.db
+*.log

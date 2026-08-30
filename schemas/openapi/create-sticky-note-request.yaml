@@ -1,0 +1,28 @@
+type: object
+description: Данные для создания стикера
+additionalProperties: false
+required:
+- content
+- position
+properties:
+  content:
+    type: string
+    description: Текст стикера
+    minLength: 1
+    maxLength: 2000
+  position:
+    description: Позиция на доске
+    $ref: ./position.yaml
+  color:
+    type: string
+    description: Цвет стикера. Если не передан, используется цвет по умолчанию
+    enum:
+    - yellow
+    - green
+    - blue
+    - pink
+  width:
+    type: integer
+    description: Ширина в пикселях. Если не передана, используется размер по умолчанию
+    minimum: 120
+    maximum: 600

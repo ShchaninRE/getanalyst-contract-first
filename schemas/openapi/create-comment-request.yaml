@@ -1,0 +1,15 @@
+type: object
+description: Данные для создания комментария
+additionalProperties: false
+required:
+- itemId
+- text
+properties:
+  itemId:
+    type: string
+    description: Идентификатор объекта комментария
+  text:
+    type: string
+    description: Текст комментария
+    minLength: 1
+    maxLength: 5000

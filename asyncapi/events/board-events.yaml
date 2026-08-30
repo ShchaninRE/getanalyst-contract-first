@@ -1,0 +1,30 @@
+asyncapi: 2.0.0 # Версия спецификации AsyncAPI для отдельного файла
+info: # Общая информация о фрагменте контракта
+  title: События изменения доски # Название фрагмента
+  description: Контракт публикации событий после изменения доски # Назначение фрагмента
+  version: 1.0.0 # Версия фрагмента контракта
+servers: # Серверы брокера сообщений
+  local: # Имя локального сервера
+    url: amqp://localhost:5672 # Адрес локального RabbitMQ
+    description: Локальный брокер RabbitMQ # Назначение сервера
+    protocol: AMQP # Протокол обмена сообщениями
+defaultContentType: application/json # Формат сообщений по умолчанию
+channels: # Каналы обмена сообщениями
+  board.changed.v1: # Routing key события изменения доски версии 1
+    description: Канал событий об изменении доски # Назначение канала
+    bindings: # Настройки канала для конкретного протокола
+      amqp: # AMQP-specific настройки
+        is: routingKey # Имя канала трактуется как routing key
+        exchange: # Настройки RabbitMQ exchange
+          name: boards # Имя exchange
+          type: topic # Тип exchange
+          durable: true # Exchange сохраняется после перезапуска брокера
+          autoDelete: false # Exchange не удаляется автоматически
+    publish: # Операция публикации сообщения в канал
+      operationId: publishBoardChanged # Уникальный идентификатор операции
+      tags: # Группы операции в документации
+        - name: Изменения доски # Операция относится к группе изменений доски
+      summary: Опубликовать изменение доски # Короткое название операции
+      description: Публикуется после успешного изменения стикера или комментария # Условие публикации события
+      message: # Сообщение, публикуемое в канал
+        $ref: '../messages/board-changed.yaml#/message' # Ссылка на message в файле asyncapi/messages/board-changed.yaml

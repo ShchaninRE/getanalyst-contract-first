@@ -1,0 +1,5 @@
+summary: Комментарий уже решён
+value:
+  code: COMMENT_ALREADY_RESOLVED
+  message: Комментарий уже решён.
+  traceId: trace-9bc82

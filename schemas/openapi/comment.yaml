@@ -1,0 +1,49 @@
+type: object
+description: Данные комментария к объекту доски
+additionalProperties: false
+required:
+- id
+- boardId
+- itemId
+- text
+- status
+- authorId
+- createdAt
+- resolvedAt
+- resolvedBy
+properties:
+  id:
+    type: string
+    description: Идентификатор комментария
+  boardId:
+    type: string
+    description: Идентификатор доски
+  itemId:
+    type: string
+    description: Идентификатор объекта комментария
+  text:
+    type: string
+    description: Текст комментария
+    minLength: 1
+    maxLength: 5000
+  status:
+    description: Текущий статус комментария
+    $ref: ./comment-status.yaml
+  authorId:
+    type: string
+    description: Идентификатор автора
+  createdAt:
+    type: string
+    format: date-time
+    description: Дата и время создания
+  resolvedAt:
+    type:
+    - string
+    - 'null'
+    format: date-time
+    description: Дата и время решения комментария
+  resolvedBy:
+    type:
+    - string
+    - 'null'
+    description: Идентификатор пользователя, решившего комментарий

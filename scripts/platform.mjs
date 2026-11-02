@@ -1,9 +1,22 @@
+
 import { spawn, spawnSync } from 'node:child_process';
 
 export const isWindows = process.platform === 'win32';
 export const npmCommand = isWindows ? 'npm.cmd' : 'npm';
 
 export function spawnNpm(args, options = {}) {
+  if (isWindows) {
+    return spawn(
+      process.env.ComSpec || 'cmd.exe',
+      ['/d', '/s', '/c', npmCommand, ...args],
+      {
+        stdio: 'inherit',
+        windowsHide: true,
+        ...options
+      }
+    );
+  }
+
   return spawn(npmCommand, args, {
     stdio: 'inherit',
     ...options
@@ -11,6 +24,18 @@ export function spawnNpm(args, options = {}) {
 }
 
 export function spawnNpmSync(args, options = {}) {
+  if (isWindows) {
+    return spawnSync(
+      process.env.ComSpec || 'cmd.exe',
+      ['/d', '/s', '/c', npmCommand, ...args],
+      {
+        stdio: 'inherit',
+        windowsHide: true,
+        ...options
+      }
+    );
+  }
+
   return spawnSync(npmCommand, args, {
     stdio: 'inherit',
     ...options

@@ -4,29 +4,68 @@ info:
   version: 1.0.0
   description: Демонстрационный API для выпуска подкаста GetAnalyst о подходе Contract-first. Описывает работу с досками, стикерами и комментариями
 servers:
-- url: http://localhost:4010
-  description: Локальный mock-сервер Prism
+  - url: http://localhost:4010
+    description: Локальный mock-сервер Prism
 security:
-- bearerAuth: []
+  - bearerAuth: []
 tags:
-- name: Boards
-  description: Получение данных доски и текущего уровня доступа пользователя
-- name: Sticky notes
-  description: Создание, редактирование и удаление стикеров на доске
-- name: Comments
-  description: Добавление комментариев и перевод открытых комментариев в решённые
+  - name: Boards
+    description: Получение данных доски и текущего уровня доступа пользователя
+  - name: Sticky notes
+    description: Создание, редактирование и удаление стикеров на доске
+  - name: Comments
+    description: Добавление комментариев и перевод открытых комментариев в решённые
 paths:
-  /boards/{boardId}:
-    parameters:
-    - $ref: '#/components/parameters/BoardId'
+  /boards:
     get:
       tags:
-      - Boards
+        - Boards
+      summary: Метод получения списка досок
+      operationId: getBoards
+      parameters:
+        - name: offset
+          description: Величина смещения
+          in: query
+          required: false
+          schema:
+            type: integer
+            example: 0
+        - name: limit
+          description: Количество досок в ответе
+          in: query
+          required: true
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: ../schemas/openapi/board.yaml
+                  total:
+                    type: integer
+                    example: 1
+
+  /boards/{boardId}:
+    parameters:
+      - $ref: "#/components/parameters/BoardId"
+    get:
+      tags:
+        - Boards
       operationId: getBoard
       summary: Получить доску
       description: Возвращает доску доступному пользователю. Доступ разрешён владельцу или участнику доски
       responses:
-        '200':
+        "200":
           description: Данные доски успешно получены
           content:
             application/json:
@@ -35,18 +74,18 @@ paths:
               examples:
                 default:
                   $ref: ../examples/openapi/board-response.yaml
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '403':
-          $ref: '#/components/responses/Forbidden'
-        '404':
-          $ref: '#/components/responses/BoardNotFound'
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/BoardNotFound"
   /boards/{boardId}/sticky-notes:
     parameters:
-    - $ref: '#/components/parameters/BoardId'
+      - $ref: "#/components/parameters/BoardId"
     post:
       tags:
-      - Sticky notes
+        - Sticky notes
       operationId: createStickyNote
       summary: Создать стикер
       description: Создаёт стикер на доске. Требуется уровень доступа `EDITOR` или `OWNER`
@@ -61,7 +100,7 @@ paths:
               contractFirst:
                 $ref: ../examples/openapi/create-sticky-note-request.yaml
       responses:
-        '201':
+        "201":
           description: Стикер успешно создан
           content:
             application/json:
@@ -70,24 +109,24 @@ paths:
               examples:
                 created:
                   $ref: ../examples/openapi/sticky-note-created-response.yaml
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '403':
-          $ref: '#/components/responses/Forbidden'
-        '404':
-          $ref: '#/components/responses/BoardNotFound'
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/BoardNotFound"
   /boards/{boardId}/sticky-notes/{stickyNoteId}: # Path для операций с конкретным стикером на конкретной доске
     parameters: # Общие path-параметры для PATCH и DELETE
-    - $ref: '#/components/parameters/BoardId' # Ссылка на параметр BoardId, описанный ниже в components.parameters
-    - $ref: '#/components/parameters/StickyNoteId' # Ссылка на параметр StickyNoteId, описанный ниже в components.parameters
+      - $ref: "#/components/parameters/BoardId" # Ссылка на параметр BoardId, описанный ниже в components.parameters
+      - $ref: "#/components/parameters/StickyNoteId" # Ссылка на параметр StickyNoteId, описанный ниже в components.parameters
     patch: # HTTP-метод для частичного изменения существующего стикера
       tags: # Группа операции в документации
-      - Sticky notes # Операция относится к разделу Sticky notes
+        - Sticky notes # Операция относится к разделу Sticky notes
       operationId: updateStickyNote # Уникальный идентификатор операции в спецификации
-      summary: Отредактировать стикер # Короткое название операции
-      description: Обновляет текст и/или позицию стикера. Требуется `EDITOR` или `OWNER`. Стикер должен принадлежать доске # Краткое описание поведения и проверки прав
+      summary: Редактировать стикер # Короткое название операции
+      description: Обновляет текст и/или позицию стикера. Требуется `EDITOR` или `OWNER`. Привет=) Стикер должен принадлежать доске # Краткое описание поведения и проверки прав
       requestBody: # Тело HTTP-запроса
         description: Изменяемые данные стикера # Назначение тела запроса
         required: true # Тело запроса обязательно
@@ -99,7 +138,7 @@ paths:
               updateText: # Имя примера изменения текста
                 $ref: ../examples/openapi/update-sticky-note-request.yaml # Ссылка на файл examples/openapi/update-sticky-note-request.yaml с примером запроса
       responses: # Возможные HTTP-ответы операции
-        '200': # Успешное обновление
+        "200": # Успешное обновление
           description: Стикер успешно обновлён # Значение ответа 200
           content: # Тело успешного ответа
             application/json: # Ответ возвращается в JSON
@@ -108,13 +147,13 @@ paths:
               examples: # Примеры успешного ответа
                 updated: # Имя примера обновлённого стикера
                   $ref: ../examples/openapi/sticky-note-updated-response.yaml # Ссылка на файл examples/openapi/sticky-note-updated-response.yaml с примером ответа
-        '400': # Некорректные входные данные
-          $ref: '#/components/responses/BadRequest' # Ссылка на общий ответ BadRequest в components.responses
-        '401': # Ошибка аутентификации
-          $ref: '#/components/responses/Unauthorized' # Ссылка на общий ответ Unauthorized в components.responses
-        '403': # Недостаточно прав
-          $ref: '#/components/responses/Forbidden' # Ссылка на общий ответ Forbidden в components.responses
-        '404': # Доска или стикер не найдены
+        "400": # Некорректные входные данные
+          $ref: "#/components/responses/BadRequest" # Ссылка на общий ответ BadRequest в components.responses
+        "401": # Ошибка аутентификации
+          $ref: "#/components/responses/Unauthorized" # Ссылка на общий ответ Unauthorized в components.responses
+        "403": # Недостаточно прав
+          $ref: "#/components/responses/Forbidden" # Ссылка на общий ответ Forbidden в components.responses
+        "404": # Доска или стикер не найдены
           description: Ресурс не найден # Общее описание HTTP 404
           content: # Тело ответа с бизнес-кодом ошибки
             application/json: # Ошибка возвращается в JSON
@@ -127,18 +166,18 @@ paths:
                   $ref: ../examples/openapi/errors/sticky-note-not-found.yaml # Ссылка на пример STICKY_NOTE_NOT_FOUND
     delete: # HTTP-метод для удаления конкретного стикера
       tags: # Группа операции в документации
-      - Sticky notes # Операция относится к разделу Sticky notes
+        - Sticky notes # Операция относится к разделу Sticky notes
       operationId: deleteStickyNote # Уникальный идентификатор операции в спецификации
       summary: Удалить стикер # Короткое название операции
       description: Удаляет стикер с доски. Требуется `EDITOR` или `OWNER`. Стикер должен принадлежать доске # Краткое описание поведения и проверки прав
       responses: # Возможные HTTP-ответы операции
-        '204': # Успешное удаление без тела ответа
+        "204": # Успешное удаление без тела ответа
           description: Стикер успешно удалён # Значение ответа 204
-        '401': # Ошибка аутентификации
-          $ref: '#/components/responses/Unauthorized' # Ссылка на общий ответ Unauthorized в components.responses
-        '403': # Недостаточно прав
-          $ref: '#/components/responses/Forbidden' # Ссылка на общий ответ Forbidden в components.responses
-        '404': # Доска или стикер не найдены
+        "401": # Ошибка аутентификации
+          $ref: "#/components/responses/Unauthorized" # Ссылка на общий ответ Unauthorized в components.responses
+        "403": # Недостаточно прав
+          $ref: "#/components/responses/Forbidden" # Ссылка на общий ответ Forbidden в components.responses
+        "404": # Доска или стикер не найдены
           description: Ресурс не найден # Общее описание HTTP 404
           content: # Тело ответа с бизнес-кодом ошибки
             application/json: # Ошибка возвращается в JSON
@@ -151,10 +190,10 @@ paths:
                   $ref: ../examples/openapi/errors/sticky-note-not-found.yaml # Ссылка на пример STICKY_NOTE_NOT_FOUND
   /boards/{boardId}/comments:
     parameters:
-    - $ref: '#/components/parameters/BoardId'
+      - $ref: "#/components/parameters/BoardId"
     post:
       tags:
-      - Comments
+        - Comments
       operationId: createComment
       summary: Добавить комментарий
       description: Добавляет комментарий к объекту доски. Требуется `COMMENTER`, `EDITOR` или `OWNER`. Объект должен принадлежать доске
@@ -169,7 +208,7 @@ paths:
               architectureComment:
                 $ref: ../examples/openapi/create-comment-request.yaml
       responses:
-        '201':
+        "201":
           description: Комментарий успешно создан
           content:
             application/json:
@@ -178,26 +217,26 @@ paths:
               examples:
                 created:
                   $ref: ../examples/openapi/comment-created-response.yaml
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '403':
-          $ref: '#/components/responses/Forbidden'
-        '404':
-          $ref: '#/components/responses/TargetNotFound'
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/TargetNotFound"
   /boards/{boardId}/comments/{commentId}/resolve:
     parameters:
-    - $ref: '#/components/parameters/BoardId'
-    - $ref: '#/components/parameters/CommentId'
+      - $ref: "#/components/parameters/BoardId"
+      - $ref: "#/components/parameters/CommentId"
     post:
       tags:
-      - Comments
+        - Comments
       operationId: resolveComment
       summary: Решить комментарий
       description: Решает открытый комментарий. Действие доступно автору, `EDITOR` или `OWNER`. Повторное решение возвращает `409 Conflict`
       responses:
-        '200':
+        "200":
           description: Комментарий успешно решён
           content:
             application/json:
@@ -206,13 +245,13 @@ paths:
               examples:
                 resolved:
                   $ref: ../examples/openapi/comment-resolved-response.yaml
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '403':
-          $ref: '#/components/responses/Forbidden'
-        '404':
-          $ref: '#/components/responses/CommentNotFound'
-        '409':
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/CommentNotFound"
+        "409":
           description: Комментарий уже решён
           content:
             application/json:
